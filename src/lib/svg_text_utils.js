@@ -17,7 +17,18 @@ function getSize(_selection, _dimension) {
 
 var FIND_TEX = /([^$]*)([$]+[^$]*[$]+)([^$]*)/;
 
-exports.convertToTspans = function(_context, gd, _callback) {
+/**
+ * Converts to <tspan /> SVG element.
+ * @param {*} _context Context
+ * @param {*} gd Graph DIV
+ * @param {*} options All props are needed to wrap.
+ *  [axLength]?: number
+ *  [orientation]?: 'v' | 'h'
+ *  [wrap]?: boolean
+ * @param {Function} _callback Callback function.
+ * @returns Modified `_context`.
+ */
+exports.convertToTspans = function(_context, gd, options, _callback) {
     var str = _context.text();
 
     // Until we get tex integrated more fully (so it can be used along with non-tex)
@@ -50,7 +61,7 @@ exports.convertToTspans = function(_context, gd, _callback) {
         _context.text('')
             .style('white-space', 'pre');
 
-        var hasLink = buildSVGText(_context.node(), str);
+        var hasLink = buildSVGText(_context.node(), str, options);
 
         if(hasLink) {
             // at least in Chrome, pointer-events does not seem
@@ -428,17 +439,16 @@ function fromCodePoint(code) {
     );
 }
 
-/*
- * buildSVGText: convert our pseudo-html into SVG tspan elements, and attach these
- * to containerNode
+/**
+ * Converts SVG `<tspan />` elements from pseudo-html into, and attach these to `containerNode`.
  *
  * @param {svg text element} containerNode: the <text> node to insert this text into
  * @param {string} str: the pseudo-html string to convert to svg
- *
+ * @param {{ axLength: number, axOrientation: 'v' | 'h', wrap?: boolean }} options
  * @returns {bool}: does the result contain any links? We need to handle the text element
  *   somewhat differently if it does, so just keep track of this when it happens.
  */
-function buildSVGText(containerNode, str) {
+function buildSVGText(containerNode, str, options) {
     /*
      * Normalize behavior between IE and others wrt newlines and whitespace:pre
      * this combination makes IE barf https://github.com/plotly/plotly.js/issues/746
@@ -446,6 +456,7 @@ function buildSVGText(containerNode, str) {
      * I feel like at some point we turned these into <br> but currently we don't so
      * I'm just going to cement what we do now in Chrome and FF
      */
+    str = options && options.axOrientation === 'v' ? 'One very long string that is soo long, that<br>I dont get it!' : str;
     str = str.replace(NEWLINES, ' ');
 
     var hasLink = false;
@@ -530,7 +541,11 @@ function buildSVGText(containerNode, str) {
     }
 
     function addTextNode(node, text) {
-        node.appendChild(document.createTextNode(text));
+        return node.appendChild(document.createTextNode(text));
+    }
+
+    function removeTextNode(node, child) {
+        node.removeChild(child);
     }
 
     function exitNode(type) {
@@ -550,16 +565,19 @@ function buildSVGText(containerNode, str) {
         currentNode = nodeStack[nodeStack.length - 1].node;
     }
 
-    var hasLines = BR_TAG.test(str);
+    var hasBrLines = BR_TAG.test(str);
 
-    if(hasLines) newLine();
+    if(hasBrLines) newLine();
     else {
         currentNode = containerNode;
         nodeStack = [{node: containerNode}];
     }
 
     var parts = str.split(SPLIT_TAGS);
-    for(var i = 0; i < parts.length; i++) {
+    // eslint-disable-next-line no-console
+    // options && options.axOrientation === 'v' && console.log(parts);
+    var i = 0;
+    for(i; i < parts.length; i++) {
         var parti = parts[i];
         var match = parti.match(ONE_TAG);
         var tagType = match && match[2].toLowerCase();
@@ -568,7 +586,33 @@ function buildSVGText(containerNode, str) {
         if(tagType === 'br') {
             newLine();
         } else if(tagStyle === undefined) {
-            addTextNode(currentNode, convertEntities(parti));
+            // addTextNode(currentNode, convertEntities(parti));
+
+            if(options && options.axOrientation === 'v') {
+                if(options.wrap) {
+                    var wordId = 0;
+                    var wordsArray = parti.split(' ');
+                    for(wordId; wordId < wordsArray.length; wordId++) {
+                        var word = wordsArray[wordId];
+                        var preSpace = wordId === 0 ? '' : ' ';
+                        var child = addTextNode(currentNode, convertEntities(preSpace + word));
+                        if(currentNode.getBBox().width > options.axLength) {
+                            removeTextNode(currentNode, child);
+                            newLine();
+                            addTextNode(currentNode, convertEntities(word));
+                        }
+                        // eslint-disable-next-line no-console
+                        // console.log(currentNode.getBBox().width);
+                    }
+
+                    // eslint-disable-next-line no-console
+                    // options && options.axOrientation === 'v' && console.log(currentNode.getBoundingClientRect().height);
+                    // eslint-disable-next-line no-console
+                    // options && options.axOrientation === 'v' && console.log(currentNode.getBBox().width);
+                } else {
+                    addTextNode(currentNode, convertEntities(parti));
+                }
+            }
         } else {
             // tag - open or close
             if(match[1]) {

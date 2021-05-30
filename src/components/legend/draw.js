@@ -496,7 +496,7 @@ function setupTraceToggle(g, gd) {
 
 function textLayout(s, g, gd, legendObj, aTitle) {
     if(legendObj._inHover) s.attr('data-notex', true); // do not process MathJax for unified hover
-    svgTextUtils.convertToTspans(s, gd, function() {
+    svgTextUtils.convertToTspans(s, gd, null, function() {
         computeTextDimensions(g, gd, legendObj, aTitle);
     });
 }

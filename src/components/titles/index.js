@@ -56,6 +56,8 @@ function draw(gd, titleClass, options) {
     var attributes = options.attributes;
     var transform = options.transform;
     var group = options.containerGroup;
+    var isAxis = options.isAxis; // Prepare documentation for this
+    var wrap = options.wrap;
 
     var fullLayout = gd._fullLayout;
 
@@ -120,6 +122,7 @@ function draw(gd, titleClass, options) {
 
     function drawTitle(titleEl) {
         var transformVal;
+        var convertOptions = null;
 
         if(transform) {
             transformVal = '';
@@ -133,6 +136,17 @@ function draw(gd, titleClass, options) {
             transformVal = null;
         }
 
+        if(isAxis && wrap) {
+            var axName = options.propContainer._name;
+            var axOut = gd._fullLayout[axName];
+
+            convertOptions = {
+                wrap: wrap,
+                axisLength: axOut._length,
+                axisOrientation: axOut._id.substr(0, 1) === 'y' ? 'v' : 'h'
+            };
+        }
+
         titleEl.attr('transform', transformVal);
 
         titleEl.style({
@@ -143,13 +157,13 @@ function draw(gd, titleClass, options) {
             'font-weight': Plots.fontWeight
         })
         .attr(attributes)
-        .call(svgTextUtils.convertToTspans, gd);
+        .call(svgTextUtils.convertToTspans, gd, convertOptions);
 
         return Plots.previousPromises(gd);
     }
 
-    function scootTitle(titleElIn) {
-        var titleGroup = d3.select(titleElIn.node().parentNode);
+    function scootTitle(titleEl) {
+        var titleGroup = d3.select(titleEl.node().parentNode);
 
         if(avoid && avoid.selection && avoid.side && txt) {
             titleGroup.attr('transform', null);

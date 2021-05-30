@@ -561,7 +561,7 @@ function populateCellText(cellText, tableControlView, allColumnBlock, gd) {
 
             var renderCallback = d.wrappingNeeded ? wrapTextMaker : updateYPositionMaker;
             if(d.needsConvertToTspans) {
-                svgUtil.convertToTspans(selection, gd, renderCallback(allColumnBlock, element, tableControlView, gd, d));
+                svgUtil.convertToTspans(selection, gd, null, renderCallback(allColumnBlock, element, tableControlView, gd, d));
             } else {
                 d3.select(element.parentNode)
                     // basic cell adjustment - compliance with `cellPad`

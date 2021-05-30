@@ -248,7 +248,7 @@ function drawRaw(gd, options, index, subplotId, xa, ya) {
             }[options.align] || 'middle'
         });
 
-        svgTextUtils.convertToTspans(s, gd, drawGraphicalElements);
+        svgTextUtils.convertToTspans(s, gd, null, drawGraphicalElements);
         return s;
     }
 
