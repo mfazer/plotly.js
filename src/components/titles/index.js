@@ -56,7 +56,7 @@ function draw(gd, titleClass, options) {
     var attributes = options.attributes;
     var transform = options.transform;
     var group = options.containerGroup;
-    var isAxis = options.isAxis; // Prepare documentation for this
+    var isAxis = options.isAxis;
     var wrap = options.wrap;
 
     var fullLayout = gd._fullLayout;
@@ -137,13 +137,13 @@ function draw(gd, titleClass, options) {
         }
 
         if(isAxis && wrap) {
-            var axName = options.propContainer._name;
-            var axOut = gd._fullLayout[axName];
+            var axisName = options.propContainer._name;
+            var axis = gd._fullLayout[axisName];
 
             convertOptions = {
                 wrap: wrap,
-                axisLength: axOut._length,
-                axisOrientation: axOut._id.substr(0, 1) === 'y' ? 'v' : 'h'
+                axisLength: axis._length,
+                axisOrientation: axis._id.substr(0, 1) === 'y' ? 'v' : 'h'
             };
         }
 

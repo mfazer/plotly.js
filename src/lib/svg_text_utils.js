@@ -19,13 +19,10 @@ var FIND_TEX = /([^$]*)([$]+[^$]*[$]+)([^$]*)/;
 
 /**
  * Converts to <tspan /> SVG element.
- * @param {*} _context Context
- * @param {*} gd Graph DIV
- * @param {*} options All props are needed to wrap.
- *  [axisLength]?: number
- *  [orientation]?: 'v' | 'h'
- *  [wrap]?: boolean
- * @param {Function} _callback Callback function.
+ * @param {*} _context
+ * @param {*} gd `graphDiv`.
+ * @param {{ axisLength: number, axisOrientation: 'v' | 'h', wrap?: boolean }} options
+ * @param {Function} _callback
  * @returns Modified `_context`.
  */
 exports.convertToTspans = function(_context, gd, options, _callback) {
@@ -440,7 +437,7 @@ function fromCodePoint(code) {
 }
 
 /**
- * Converts SVG `<tspan />` elements from pseudo-html into, and attach these to `containerNode`.
+ * Converts our pseudo-html SVG `<tspan />` into elements, and attach these to `containerNode`.
  *
  * @param {svg text element} containerNode: the <text> node to insert this text into
  * @param {string} str: the pseudo-html string to convert to svg
@@ -456,7 +453,6 @@ function buildSVGText(containerNode, str, options) {
      * I feel like at some point we turned these into <br> but currently we don't so
      * I'm just going to cement what we do now in Chrome and FF
      */
-    str = options && options.axisOrientation === 'v' ? 'One very long string that is soo long, that<br>I dont get it!' : str;
     str = str.replace(NEWLINES, ' ');
 
     var hasLink = false;
@@ -574,8 +570,7 @@ function buildSVGText(containerNode, str, options) {
     }
 
     var parts = str.split(SPLIT_TAGS);
-    // eslint-disable-next-line no-console
-    // options && options.axisOrientation === 'v' && console.log(parts);
+
     var i = 0;
     for(i; i < parts.length; i++) {
         var parti = parts[i];
@@ -586,31 +581,22 @@ function buildSVGText(containerNode, str, options) {
         if(tagType === 'br') {
             newLine();
         } else if(tagStyle === undefined) {
-            // addTextNode(currentNode, convertEntities(parti));
+            if(!(options && options.wrap)) return void(addTextNode(currentNode, convertEntities(parti)));
 
-            if(options && options.axisOrientation === 'v') {
-                if(options.wrap) {
-                    var wordId = 0;
-                    var wordsArray = parti.split(' ');
-                    for(wordId; wordId < wordsArray.length; wordId++) {
-                        var word = wordsArray[wordId];
-                        var preSpace = wordId === 0 ? '' : ' ';
-                        var child = addTextNode(currentNode, convertEntities(preSpace + word));
-                        if(currentNode.getBBox().width > options.axisLength) {
-                            removeTextNode(currentNode, child);
-                            newLine();
-                            addTextNode(currentNode, convertEntities(word));
-                        }
-                        // eslint-disable-next-line no-console
-                        // console.log(currentNode.getBBox().width);
-                    }
+            var wordId = 0;
+            var wordsArray = parti.split(' ');
 
-                    // eslint-disable-next-line no-console
-                    // options && options.axisOrientation === 'v' && console.log(currentNode.getBoundingClientRect().height);
-                    // eslint-disable-next-line no-console
-                    // options && options.axisOrientation === 'v' && console.log(currentNode.getBBox().width);
-                } else {
-                    addTextNode(currentNode, convertEntities(parti));
+            newLine();
+
+            for(wordId; wordId < wordsArray.length; wordId++) {
+                var word = wordsArray[wordId];
+                var preSpace = wordId === 0 ? '' : ' ';
+                var child = addTextNode(currentNode, convertEntities(preSpace + word));
+
+                if(currentNode.getBBox().width > options.axisLength) {
+                    removeTextNode(currentNode, child);
+                    newLine();
+                    addTextNode(currentNode, convertEntities(word));
                 }
             }
         } else {

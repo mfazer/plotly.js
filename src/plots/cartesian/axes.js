@@ -3464,7 +3464,7 @@ function drawTitle(gd, ax) {
     var axId = ax._id;
     var axLetter = axId.charAt(0);
     var fontSize = ax.title.font.size;
-    // var wrap = ax.title.wrap; // TODO: Update documentation and the TypeScript types.
+    var wrap = ax.title.wrap; // TODO: Update our API documentation and the TypeScript types!.
 
     var titleStandoff;
 
@@ -3539,11 +3539,8 @@ function drawTitle(gd, ax) {
         avoid: avoid,
         transform: transform,
         attributes: {x: x, y: y, 'text-anchor': 'middle'},
+        wrap: wrap,
         isAxis: true,
-        // wrap: wrap
-        // HEY! This is for testing only!
-        wrap: 'breakword',
-        // TODO: options: 'breakword' | 'breakchar' | undefined (default)
     });
 }
 
