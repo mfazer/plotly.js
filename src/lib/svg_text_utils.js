@@ -22,7 +22,7 @@ var FIND_TEX = /([^$]*)([$]+[^$]*[$]+)([^$]*)/;
  * @param {*} _context Context
  * @param {*} gd Graph DIV
  * @param {*} options All props are needed to wrap.
- *  [axLength]?: number
+ *  [axisLength]?: number
  *  [orientation]?: 'v' | 'h'
  *  [wrap]?: boolean
  * @param {Function} _callback Callback function.
@@ -444,7 +444,7 @@ function fromCodePoint(code) {
  *
  * @param {svg text element} containerNode: the <text> node to insert this text into
  * @param {string} str: the pseudo-html string to convert to svg
- * @param {{ axLength: number, axOrientation: 'v' | 'h', wrap?: boolean }} options
+ * @param {{ axisLength: number, axisOrientation: 'v' | 'h', wrap?: boolean }} options
  * @returns {bool}: does the result contain any links? We need to handle the text element
  *   somewhat differently if it does, so just keep track of this when it happens.
  */
@@ -456,7 +456,7 @@ function buildSVGText(containerNode, str, options) {
      * I feel like at some point we turned these into <br> but currently we don't so
      * I'm just going to cement what we do now in Chrome and FF
      */
-    str = options && options.axOrientation === 'v' ? 'One very long string that is soo long, that<br>I dont get it!' : str;
+    str = options && options.axisOrientation === 'v' ? 'One very long string that is soo long, that<br>I dont get it!' : str;
     str = str.replace(NEWLINES, ' ');
 
     var hasLink = false;
@@ -575,7 +575,7 @@ function buildSVGText(containerNode, str, options) {
 
     var parts = str.split(SPLIT_TAGS);
     // eslint-disable-next-line no-console
-    // options && options.axOrientation === 'v' && console.log(parts);
+    // options && options.axisOrientation === 'v' && console.log(parts);
     var i = 0;
     for(i; i < parts.length; i++) {
         var parti = parts[i];
@@ -588,7 +588,7 @@ function buildSVGText(containerNode, str, options) {
         } else if(tagStyle === undefined) {
             // addTextNode(currentNode, convertEntities(parti));
 
-            if(options && options.axOrientation === 'v') {
+            if(options && options.axisOrientation === 'v') {
                 if(options.wrap) {
                     var wordId = 0;
                     var wordsArray = parti.split(' ');
@@ -596,7 +596,7 @@ function buildSVGText(containerNode, str, options) {
                         var word = wordsArray[wordId];
                         var preSpace = wordId === 0 ? '' : ' ';
                         var child = addTextNode(currentNode, convertEntities(preSpace + word));
-                        if(currentNode.getBBox().width > options.axLength) {
+                        if(currentNode.getBBox().width > options.axisLength) {
                             removeTextNode(currentNode, child);
                             newLine();
                             addTextNode(currentNode, convertEntities(word));
@@ -606,9 +606,9 @@ function buildSVGText(containerNode, str, options) {
                     }
 
                     // eslint-disable-next-line no-console
-                    // options && options.axOrientation === 'v' && console.log(currentNode.getBoundingClientRect().height);
+                    // options && options.axisOrientation === 'v' && console.log(currentNode.getBoundingClientRect().height);
                     // eslint-disable-next-line no-console
-                    // options && options.axOrientation === 'v' && console.log(currentNode.getBBox().width);
+                    // options && options.axisOrientation === 'v' && console.log(currentNode.getBBox().width);
                 } else {
                     addTextNode(currentNode, convertEntities(parti));
                 }

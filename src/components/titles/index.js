@@ -122,7 +122,7 @@ function draw(gd, titleClass, options) {
 
     function drawTitle(titleEl) {
         var transformVal;
-        var convertOptions = null;
+        var convertOptions;
 
         if(transform) {
             transformVal = '';
